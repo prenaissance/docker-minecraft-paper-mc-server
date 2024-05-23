@@ -45,6 +45,9 @@ ADD https://github.com/itzg/rcon-cli/releases/download/${RCON_CLI_VER}/rcon-cli_
 RUN tar -x -C /usr/local/bin -f /tmp/rcon-cli.tgz rcon-cli && \
   rm /tmp/rcon-cli.tgz
 
+# Volumes for the external data (Server, World, Config...)
+VOLUME "/data"
+
 # Expose minecraft port
 EXPOSE 25565/tcp
 EXPOSE 25565/udp
