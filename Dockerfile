@@ -24,11 +24,11 @@ FROM eclipse-temurin:21-jre AS runtime
 ARG TARGETARCH
 # Install gosu
 RUN set -eux; \
- apt-get update; \
- apt-get install -y gosu; \
- rm -rf /var/lib/apt/lists/*; \
-# verify that the binary works
- gosu nobody true
+  apt-get update; \
+  apt-get install -y gosu; \
+  rm -rf /var/lib/apt/lists/*; \
+  # verify that the binary works
+  gosu nobody true
 
 # Install webp (e.g. for Dynmap) Might not be available on ARM (RPI)
 RUN apt-get update && apt-get install -y webp
