@@ -22,5 +22,9 @@ if ! id "$DOCKER_USER" >/dev/null 2>&1; then
 	fi
 fi
 
+# Set memory variables if not already set, falling back to MEMORYSIZE if needed
+INIT_MEMORY=${INIT_MEMORY:-${MEMORY:-${MEMORYSIZE:-1G}}}
+MAX_MEMORY=${MAX_MEMORY:-${MEMORY:-${MEMORYSIZE:-1G}}}
+
 export HOME=/home/$DOCKER_USER
-exec gosu $DOCKER_USER:$DOCKER_GROUP java -jar -Xms$INIT_MEMORY -Xmx$MAX_MEMORY $JAVAFLAGS /opt/minecraft/paperspigot.jar $PAPERMC_FLAGS nogui
+exec gosu $DOCKER_USER:$DOCKER_GROUP java -Xms$INIT_MEMORY -Xmx$MAX_MEMORY $JAVAFLAGS -jar /opt/minecraft/paperspigot.jar $PAPERMC_FLAGS nogui
