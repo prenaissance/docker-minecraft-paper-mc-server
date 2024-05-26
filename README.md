@@ -2,12 +2,12 @@
 
 Docker Minecraft PaperMC server for 1.20, 1.19, 1.18, 1.17 for AMD64 and ARM64 platforms. Works on Synology, Raspberry Pi 4 or any other systems that support docker.
 
-[![Build and push](https://github.com/mtoensing/Docker-Minecraft-PaperMC-Server/actions/workflows/dockerimage.yml/badge.svg?branch=master&event=push)](https://github.com/mtoensing/Docker-Minecraft-PaperMC-Server/actions/workflows/dockerimage.yml)
+[![Build and push](https://github.com/mtoensing/Docker-Minecraft-PaperMC-Server/actions/workflows/dockerimage.yml/badge.svg)](https://github.com/mtoensing/Docker-Minecraft-PaperMC-Server/actions/workflows/dockerimage.yml)
 
 ## Quick Start
 
 ```sh
-docker run --name mcserver -e MEMORYSIZE='1G' -v /home/joe/mcserver:/data:rw -p 25565:25565 -i marctv/minecraft-papermc-server:latest
+docker run --name mcserver -e MEMORY='1G' -v /home/joe/mcserver:/data:rw -p 25565:25565 -i marctv/minecraft-papermc-server:latest
 ```
 
 The server will generate all data including the world and config files in `/home/joe/mcserver`. Change that to an existing folder.
@@ -17,7 +17,7 @@ The server will generate all data including the world and config files in `/home
 docker run -d \
   --name mcserver \
   --restart=unless-stopped \
-  -e MEMORYSIZE="1G" \
+  -e MEMORY="1G" \
   -p 25565:25565/tcp \
   -p 25565:25565/udp \
   -v /home/docker/mcserver:/data:rw \
@@ -33,7 +33,7 @@ services:
     restart: always
     container_name: "mcserver"
     environment:
-      MEMORYSIZE: "1G"
+      MEMORY: "1G"
       PAPERMC_FLAGS: ""
     volumes:
       - minecraftserver:/data
@@ -123,7 +123,7 @@ make help      # prints a help message
 
 ## Environment variables
 
-MEMORYSIZE = 1G
+MEMORY = 1G
 
 Not more than 70% of your RAM for your container. This is important. Because this is the RAM, your Minecraft Server will use within the container WITHOUT the operating system.
 
@@ -205,7 +205,7 @@ mkdir mcserver
 docker run -d \
 --restart unless-stopped \
 --name mcserver \
--e MEMORYSIZE='1G' \
+-e MEMORY='1G' \
 -e PAPERMC_FLAGS='' \
 -v /home/pi/mcserver:/data:rw \
 -p 25565:25565 \
