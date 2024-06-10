@@ -25,8 +25,7 @@ docker run -d \
 ```
 ## Docker Compose (Portainer Stacks)
 
-```shell
-version: "3"
+```yaml
 services:
   minecraft:
     image: marctv/minecraft-papermc-server:latest
@@ -85,23 +84,23 @@ that you passed using the environment variables above and then add the following
 
 ## Docker Compose
 
-If you prefer to use `docker-compose`, use the following commands:
+If you prefer to use `docker compose`, use the following commands:
 
 Start the server:
 
-```sh
-docker-compose up
+```shell
+docker compose up
 ```
 
 Stop the server:
 
-```sh
-docker-compose stop
+```shell
+docker compose stop
 ```
 
 Issue server commands after attaching to the container:
 
-```sh
+```shell
 docker attach mcserver
 # then you can type things like "list"
 list
@@ -114,9 +113,9 @@ help
 
 Additionally, a `Makefile` is provided to easily start, stop, and attach to the container.
 
-```sh
-make start     # equivalent to `docker-compose up -d --build`
-make stop      # equivalent to `docker-compose stop --rmi all --remove-orphans`
+```shell
+make start     # equivalent to `docker compose up -d --build`
+make stop      # equivalent to `docker compose stop --rmi all --remove-orphans`
 make attach    # equivalent to `docker attach mcserver`
 make help      # prints a help message
 ```
@@ -209,7 +208,7 @@ docker run -d \
 -e PAPERMC_FLAGS='' \
 -v /home/pi/mcserver:/data:rw \
 -p 25565:25565 \
--it marctv/minecraft-papermc-server:latest
+-it docker.io/marctv/minecraft-papermc-server:latest
 ```
 
 The server will generate all data including the world and config files in `/home/pi/mcserver`.

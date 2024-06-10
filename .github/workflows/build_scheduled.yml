@@ -1,0 +1,107 @@
+name: 'build scheduled'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */12 * * *" # every 12 hours
+
+jobs:
+  get_all_versions:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.get_versions.outputs.versions }}
+      latest: ${{ steps.find_latest.outputs.latest }}
+    steps:
+      - name: get available versions
+        id: get_versions
+        run: |
+          curl -s -o versions.json "https://api.papermc.io/v2/projects/paper"
+          VERSIONS=$(jq -c '[.versions | nth(-3, -2, -1)]' versions.json)
+          echo "versions=$VERSIONS" >> "$GITHUB_OUTPUT"
+
+      - name: find latest
+        id: find_latest
+        run: |
+          for VERSION in $(echo '${{ steps.get_versions.outputs.versions }}' | jq -r '.[]');
+          do
+            echo "check for ${VERSION}"
+            curl -s -o "${VERSION}.json" "https://api.papermc.io/v2/projects/paper/versions/${VERSION}/builds"
+            HAS_STABLE=$(jq 'last(.builds[] | select(.channel=="default")).build' "${VERSION}.json")
+            if  [[ "$HAS_STABLE" =~ ^[0-9]+$ ]]; then
+              LATEST="${VERSION}"
+            fi
+          done
+          
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: show output
+        run: |
+          echo "versions: ${{ steps.get_versions.outputs.versions }}"
+          echo "latest: ${{ steps.find_latest.outputs.latest }}"
+
+  build_for_version:
+    runs-on: ubuntu-latest
+    needs: get_all_versions
+    permissions: write-all
+    strategy:
+      matrix:
+        versions: ${{ fromJson(needs.get_all_versions.outputs.versions) }}
+    steps:
+      - name: get latest build
+        id: latest_build
+        run: |
+          BUILDS=$(curl -s -o builds.json https://api.papermc.io/v2/projects/paper/versions/${{ matrix.versions }}/builds)
+          BUILD_STABLE=$(jq 'last(.builds[] | select(.channel=="default")).build' builds.json)
+          BUILD_EXPERIMENTAL=$(jq 'last(.builds[] | select(.channel=="experimental")).build' builds.json)
+          echo "build_stable=$BUILD_STABLE" >> $GITHUB_OUTPUT
+          echo "build_experimental=$BUILD_EXPERIMENTAL" >> $GITHUB_OUTPUT
+          
+          if  [[ "$BUILD_STABLE" =~ ^[0-9]+$ ]]; then
+            BUILD_NUMBER=$BUILD_STABLE
+            BUILD_TYPE=stable
+          else
+            BUILD_NUMBER=$BUILD_EXPERIMENTAL
+            BUILD_TYPE=experimental
+          fi
+          
+          echo build_number="${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo build_type="${BUILD_TYPE}" >> $GITHUB_OUTPUT
+
+          if [[ $BUILD_TYPE == "stable" && "${{ needs.get_all_versions.outputs.latest }}" == "${{ matrix.versions }}" ]]; then
+            echo is_latest="yes" >> $GITHUB_OUTPUT
+          else
+            echo is_latest="no" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ $BUILD_TYPE == "experimental" && "${{ needs.get_all_versions.outputs.latest }}" -lt "${{ matrix.versions }}" ]]; then
+            echo is_experimental="yes" >> $GITHUB_OUTPUT
+          else
+            echo is_experimental="no" >> $GITHUB_OUTPUT
+          fi
+
+      - name: get self build
+        id: self_build
+        run: |
+          DOCKER_IMAGE="ghcr.io/${{ github.repository_owner }}/docker-minecraft-papermc-server:${{ matrix.versions }}"
+          docker pull $DOCKER_IMAGE
+          echo self_build=$(docker inspect $DOCKER_IMAGE --format '{{ index .Config.Labels "org.mojang.minecraft.papermc.build"}}') >> $GITHUB_OUTPUT
+
+      - name: show output
+        if: always()
+        run: |
+          echo "latest: ${{ needs.get_all_versions.outputs.latest }}"
+          echo "version: ${{ matrix.versions }}"
+          echo "build_stable: ${{ steps.latest_build.outputs.build_stable }}"
+          echo "build_experimental: ${{ steps.latest_build.outputs.build_experimental }}"
+          echo "build_number: ${{ steps.latest_build.outputs.build_number }}"
+          echo "build_type: ${{ steps.latest_build.outputs.build_type }}"
+          echo "is_latest: ${{ steps.latest_build.outputs.is_latest }}"
+          echo "is_experimental: ${{ steps.latest_build.outputs.is_experimental }}"
+          echo "self_build: ${{ steps.self_build.outputs.self_build }}"
+
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        if: github.event_name == 'workflow_dispatch' || steps.latest_build.outputs.build_number != steps.self_build.outputs.self_build
+        with:
+          event-type: build_version
+          client-payload: '{"download_version": "${{ matrix.versions }}", "is_latest": "${{ steps.latest_build.outputs.is_latest }}", "is_experimental": "${{ steps.latest_build.outputs.is_experimental }}"}'
