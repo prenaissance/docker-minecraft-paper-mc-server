@@ -1,7 +1,6 @@
-version: "3.9"
 services:
   minecraft:
-    image: "marctv/minecraft-papermc-server:latest"
+    image: docker.io/marctv/minecraft-papermc-server:latest
     restart: always
     container_name: "mcserver"
     environment:
