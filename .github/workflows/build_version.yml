@@ -109,4 +109,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            DOWNLOAD_URL=${{ steps.get_build.outputs.download_version }}
+            DOWNLOAD_URL=${{ steps.get_build.outputs.download_url }}
