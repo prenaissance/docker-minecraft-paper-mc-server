@@ -82,7 +82,8 @@ jobs:
       - name: get self build
         id: self_build
         run: |
-          DOCKER_IMAGE="ghcr.io/${{ github.repository_owner }}/docker-minecraft-papermc-server:${{ matrix.versions }}"
+          # DOCKER_IMAGE="ghcr.io/${{ github.repository_owner }}/docker-minecraft-papermc-server:${{ matrix.versions }}"
+          DOCKER_IMAGE="docker.io/marctv/minecraft-papermc-server:${{ matrix.versions }}"
           docker pull $DOCKER_IMAGE
           echo self_build=$(docker inspect $DOCKER_IMAGE --format '{{ index .Config.Labels "org.mojang.minecraft.papermc.build"}}') >> $GITHUB_OUTPUT
 
