@@ -84,8 +84,8 @@ jobs:
         run: |
           # DOCKER_IMAGE="ghcr.io/${{ github.repository_owner }}/docker-minecraft-papermc-server:${{ matrix.versions }}"
           DOCKER_IMAGE="docker.io/marctv/minecraft-papermc-server:${{ matrix.versions }}"
-          docker pull $DOCKER_IMAGE
-          echo self_build=$(docker inspect $DOCKER_IMAGE --format '{{ index .Config.Labels "org.mojang.minecraft.papermc.build"}}') >> $GITHUB_OUTPUT
+          docker pull $DOCKER_IMAGE || true
+          echo self_build=$(docker inspect $DOCKER_IMAGE --format '{{ index .Config.Labels "org.mojang.minecraft.papermc.build"}}' || true) >> $GITHUB_OUTPUT
 
       - name: show output
         if: always()
