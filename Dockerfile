@@ -9,7 +9,7 @@ ADD "${DOWNLOAD_URL}" /opt/minecraft/paperspigot.jar
 COPY --from=docker.io/itzg/rcon-cli:latest /rcon-cli /usr/local/bin/rcon-cli
 
 # install dependencies
-RUN apt update && apt install -y gosu webp && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y gosu webp adduser && rm -rf /var/lib/apt/lists/*
 
 # Expose minecraft port
 EXPOSE 25565/tcp 25565/udp

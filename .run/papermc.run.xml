@@ -8,7 +8,7 @@
           <list>
             <DockerEnvVarImpl>
               <option name="name" value="DOWNLOAD_URL" />
-              <option name="value" value="https://papermc.io/api/v2/projects/paper/versions/1.20.6/builds/138/downloads/paper-1.20.6-138.jar" />
+              <option name="value" value="https://papermc.io/api/v2/projects/paper/versions/1.21/builds/109/downloads/paper-1.21-109.jar" />
             </DockerEnvVarImpl>
           </list>
         </option>
