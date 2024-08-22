@@ -21,8 +21,16 @@ if ! id "$DOCKER_USER" >/dev/null 2>&1; then
         echo "Created group $DOCKER_GROUP with GID $GROUP_ID."
     fi
 
-    # Create user with the specified UID and associated group
-    adduser --shell /bin/sh --uid $USER_ID --ingroup $DOCKER_GROUP --disabled-password --gecos "" $DOCKER_USER
+    # Check if the desired USER_ID is already in use
+    if id -u $USER_ID >/dev/null 2>&1; then
+        EXISTING_USER=$(getent passwd $USER_ID | cut -d: -f1)
+        echo "UID $USER_ID is already in use by user $EXISTING_USER. Using this user."
+        DOCKER_USER=$EXISTING_USER
+    else
+        # Create user with the specified UID and associated group
+        adduser --shell /bin/sh --uid $USER_ID --ingroup $DOCKER_GROUP --disabled-password --gecos "" $DOCKER_USER
+        echo "Created user $DOCKER_USER with UID $USER_ID."
+    fi
 
     # Set ownership and permissions
     chown -vR $USER_ID:$GROUP_ID /opt/minecraft
